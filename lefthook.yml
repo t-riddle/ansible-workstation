@@ -1,0 +1,8 @@
+pre-commit:
+  scripts:
+    "branch-check.py":
+      runner: python3
+commit-msg:
+  scripts:
+    "commit-msg.py":
+      runner: python3

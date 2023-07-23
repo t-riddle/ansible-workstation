@@ -1,0 +1,157 @@
+---
+- name: add tools directory
+  become: yes
+  become_user: "{{ ws_username }}"
+  file:
+    state: directory
+    path: "{{ ws_home_dir }}/tools"
+    
+- name: add device specific repositories
+  apt_repository:
+    repo: "{{ item }}"
+  loop:
+    "{{ additional_repositories }}"
+
+- name: add hashicorp apt repository gpg
+  apt_key:
+    url: https://apt.releases.hashicorp.com/gpg
+    state: present
+
+- name: add hashicorp apt repository
+  apt_repository:
+    repo: deb [arch=amd64] https://apt.releases.hashicorp.com jammy main
+
+- name: refresh apt cache
+  apt:
+    update_cache: yes
+    force_apt_get: yes
+    cache_valid_time: 3600
+
+- name: install default packages
+  package:
+    name: "{{ default_packages }}"
+    state: latest
+
+- name: install device packages
+  package:
+    name: "{{ packages }}"
+    state: latest
+
+- name: install galaxy collections
+  command: ansible-galaxy collection install community.general
+
+- name: install pip packages
+  pip:
+    name: "{{ pip_packages }}"
+
+- name: download k9s
+  get_url:
+    url: https://github.com/derailed/k9s/releases/download/v{{ k9s_version }}/k9s_Linux_amd64.tar.gz
+    dest: "{{ ws_home_dir }}/Downloads/k9s.tar.gz"
+
+- name: unarchive k9s
+  unarchive:
+    src: "{{ ws_home_dir }}/Downloads/k9s.tar.gz"
+    dest: "{{ ws_home_dir }}/Downloads/"
+
+- name: install k9s
+  copy:
+    remote_src: true
+    src: "{{ ws_home_dir }}/Downloads/k9s"
+    dest: "/usr/bin/k9s"
+    mode: "0751"
+
+- name: install kubectl
+  get_url:
+    url: https://dl.k8s.io/release/v{{ kubectl_version }}/bin/{{ os_type }}/{{ architecture }}/kubectl
+    dest: "/usr/bin/kubectl"
+    mode: '0755'
+
+- name: install tfenv
+  become: yes
+  become_user: "{{ ws_username }}"
+  git:
+    repo: https://github.com/tfutils/tfenv.git
+    dest: "{{ ws_home_dir }}/.tfenv"
+    depth: 1
+
+- name: link tfenv
+  file:
+    src: "{{ ws_home_dir }}/.tfenv/bin/tfenv"
+    dest: "{{ ws_home_dir }}/tools/tfenv"
+    state: link
+    mode: '0755'
+
+- name: link tfenv terraform
+  file:
+    src: "{{ ws_home_dir }}/.tfenv/bin/terraform"
+    dest: "{{ ws_home_dir }}/tools/terraform"
+    state: link
+    mode: '0755'
+
+- name: download helm
+  get_url:
+    url: https://get.helm.sh/helm-{{ helm_version }}-{{ os_type }}-{{ architecture }}.tar.gz
+    dest: "{{ ws_home_dir }}/Downloads/helm.tar.gz"
+
+- name: unarchive helm
+  unarchive:
+    src: "{{ ws_home_dir }}/Downloads/helm.tar.gz"
+    dest: "{{ ws_home_dir }}/Downloads/"
+
+- name: install helm
+  copy:
+    remote_src: true
+    src: "{{ ws_home_dir }}/Downloads/{{ os_type }}-{{ architecture }}/helm"
+    dest: "/usr/bin/helm"
+    mode: "0751"
+
+- name: download istio
+  get_url:
+    url: https://github.com/istio/istio/releases/download/{{ istio_version }}/istioctl-{{ istio_version }}-{{ os_type }}-{{ architecture }}.tar.gz
+    dest: "{{ ws_home_dir }}/Downloads/istio.tar.gz"
+
+- name: unarchive and install istio
+  unarchive:
+    src: "{{ ws_home_dir }}/Downloads/istio.tar.gz"
+    dest: "/usr/bin/"
+    mode: '0751'
+
+- name: generate latest jetbrains toolbox url
+  shell: echo $(curl -s 'https://data.services.jetbrains.com/products/releases?code=TBA&latest=true&type=release' | grep -Po '"linux":.*?[^\\]",' | awk -F ':' '{print $3,":"$4}'| sed 's/[", ]//g')
+  register: jetbrains_url
+
+- name: generate jetbrains version directory name
+  shell: echo "{{ jetbrains_url.stdout }}" | sed 's/.*\///' | sed 's/\.tar\.gz//'
+  register: jetbrains_directory
+
+- name: download jetbrains toolbox
+  become: yes
+  become_user: "{{ ws_username }}"
+  get_url:
+    url: "{{ jetbrains_url.stdout }}"
+    dest: "{{ ws_home_dir }}/Downloads/jetbrains.tar.gz"
+
+- name: unarchive jetbrains toolbox
+  become: yes
+  become_user: "{{ ws_username }}"
+  unarchive:
+    src: "{{ ws_home_dir}}/Downloads/jetbrains.tar.gz"
+    dest: "{{ ws_home_dir }}/Downloads/"
+
+- name: install jetbrains toolbox
+  become: yes
+  become_user: "{{ ws_username }}"
+  copy:
+    remote_src: true
+    src: "{{ ws_home_dir }}/Downloads/{{ jetbrains_directory.stdout }}/jetbrains-toolbox"
+    dest: "{{ ws_home_dir }}/tools/jetbrains-toolbox"
+    mode: '0751'
+
+- name: install lefthook
+  become: yes
+  become_user: "{{ ws_username }}"
+  get_url:
+    url: https://github.com/evilmartians/lefthook/releases/download/v{{ lefthook_version }}/lefthook_{{ lefthook_version }}_Linux_x86_64
+    dest: "{{ ws_home_dir }}/tools/lefthook"
+    mode: '0751'

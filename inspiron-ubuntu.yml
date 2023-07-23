@@ -1,0 +1,4 @@
+---
+- hosts: inspiron-7610
+  roles:
+    - ubuntu

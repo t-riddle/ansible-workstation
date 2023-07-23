@@ -1,0 +1,7 @@
+# ANSIBLE MANAGED - Do not modify manually
+{% for host in ssh_keys %}
+Host {{ host.host_list }}
+  IdentityFile ~/.ssh/{{ host.key_name }}
+  PreferredAuthentications publickey
+  PasswordAuthentication no
+{% endfor %}
