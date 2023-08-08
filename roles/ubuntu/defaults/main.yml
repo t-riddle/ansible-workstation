@@ -1,4 +1,7 @@
 ---
+general_directories_enabled: false
+general_configs_content_enabled: false
+general_configs_files_enabled: false
 ssh_configure: false
 default_packages:
   - git
