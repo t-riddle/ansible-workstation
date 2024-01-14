@@ -1,0 +1,80 @@
+---
+- name: set user shell
+  user:
+    name: "{{ ws_username }}"
+    shell: /bin/zsh
+
+- name: check if oh-my-zsh is installed
+  stat: path={{ ws_home_dir }}/.oh-my-zsh
+  register: omz_dir
+
+- name: download oh-my-zsh install script
+  get_url:
+    url: https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
+    dest: "{{ ws_home_dir }}/Downloads/omz_install.sh"
+    mode: '0754'
+    owner: "{{ ws_username }}"
+  when: not omz_dir.stat.exists
+
+- name: install oh-my-zsh
+  become: yes
+  become_user: "{{ ws_username }}"
+  command: "{{ ws_home_dir }}/Downloads/omz_install.sh --unattended"
+  environment:
+    USER: "{{ ws_username }}"
+    HOME: "{{ ws_home_dir }}"
+  when: not omz_dir.stat.exists
+
+- name: create fonts directory in home
+  file:
+    state: directory
+    path: "{{ ws_home_dir }}/.fonts"
+
+- name: install fonts
+  copy:
+    src: "{{ item }}"
+    dest: "{{ ws_home_dir }}/.fonts/{{ item }}"
+    mode: '0644'
+    owner: "{{ ws_username }}"
+    group: "{{ ws_username }}"
+  with_items: "{{ fonts }}"
+
+- name: check powerlevel10k installed
+  stat: path={{ ws_home_dir }}/.oh-my-zsh/custom/themes/powerlevel10k
+  register: p10k_dir
+
+- name: install powerlevel10k theme
+  command: git clone --depth=1 https://github.com/romkatv/powerlevel10k.git {{ ws_home_dir }}/.oh-my-zsh/custom/themes/powerlevel10k
+  when: not p10k_dir.stat.exists
+
+- name: check zsh syntax highlighting installed
+  stat: path={{ ws_home_dir }}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+  register: zsh_syn_hl
+
+- name: install zsh syntax highlighting
+  command: git clone https://github.com/zsh-users/zsh-syntax-highlighting.git {{ ws_home_dir }}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+  when: not zsh_syn_hl.stat.exists
+
+- name: check zsh autosuggestions installed
+  stat: path={{ ws_home_dir }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+  register: zsh_autosuggestions
+
+- name: install zsh autosuggestions
+  command: git clone https://github.com/zsh-users/zsh-autosuggestions {{ ws_home_dir }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+  when: not zsh_autosuggestions.stat.exists
+
+- name: configure zsh
+  template:
+    src: zshrc.j2
+    dest: "{{ ws_home_dir }}/.zshrc"
+    mode: '0644'
+    owner: "{{ ws_username }}"
+    group: "{{ ws_username }}"
+
+- name: configure p10k
+  copy:
+    src: p10k.zsh
+    dest: "{{ ws_home_dir }}/.p10k.zsh"
+    mode: '0644'
+    owner: "{{ ws_username }}"
+    group: "{{ ws_username }}"

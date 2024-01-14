@@ -1,0 +1,13 @@
+---
+- name: check terminator config dir
+  file:
+    state: directory
+    path: "{{ ws_home_dir }}/.config/terminator"
+
+- name: configure terminator
+  template:
+    src: terminator.j2
+    dest: "{{ ws_home_dir }}/.config/terminator/config"
+    mode: '0664'
+    owner: "{{ ws_username }}"
+    group: "{{ ws_username }}"
