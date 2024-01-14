@@ -1,0 +1,7 @@
+---
+- import_tasks: packages.yml
+- import_tasks: ssh.yml
+  when: ssh_configure
+- import_tasks: zsh.yml
+- import_tasks: terminator.yml
+- import_tasks: general.yml

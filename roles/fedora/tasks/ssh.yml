@@ -1,0 +1,21 @@
+---
+- name: add ssh configuration
+  become: yes
+  become_user: "{{ ws_username }}"
+  template:
+    dest: "{{ ws_home_dir }}/.ssh/config"
+    src: ssh_config.j2
+    mode: '0644'
+
+- name: add ssh keys
+  become: yes
+  become_user: "{{ ws_username }}"
+  no_log: true
+  copy:
+    dest: "{{ ws_home_dir }}/.ssh/{{ item.key_name }}"
+    content: "{{ item.ssh_contents }}\n"
+    owner: "{{ ws_username }}"
+    group: "{{ ws_username }}"
+    mode: '0400'
+  loop:
+    "{{ ssh_keys }}"

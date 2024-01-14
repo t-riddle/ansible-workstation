@@ -1,0 +1,45 @@
+---
+general_directories_enabled: false
+general_configs_content_enabled: false
+general_configs_files_enabled: false
+ssh_configure: false
+default_packages:
+  - git
+  - curl
+  - wget
+  - fuse
+  - fuse3
+  - ansible
+  - vim
+  - terminator
+  - htop
+  - gnome-control-center
+  - zip
+  - unzip
+  - python3
+  - python3-pip
+  - python-setuptools
+  - python2.7
+  - zsh
+  - vault
+  - consul
+  - xclip
+  - awscli
+
+pip_packages:
+  - hvac
+
+packages:
+  - gh
+
+k9s_version: "0.27.4"
+kubectl_version: "1.27.4"
+helm_version: "v3.12.2"
+istio_version: "1.20.2"
+lefthook_version: "1.4.6"
+
+fonts:
+  - meslo_nf_bold.ttf
+  - meslo_nf_bold_italic.ttf
+  - meslo_nf_italic.ttf
+  - meslo_nf_regular.ttf

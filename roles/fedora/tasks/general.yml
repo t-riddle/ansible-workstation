@@ -1,0 +1,40 @@
+---
+- name: add general directories
+  become: yes
+  become_user: "{{ ws_username }}"
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: "{{ item.mode | default('0755') }}"
+    owner: "{{ item.owner | default(ws_username) }}"
+    group: "{{ item.group | default(ws_username) }}"
+  when: general_directories_enabled
+  loop:
+    "{{ general_directories }}"
+
+- name: add general configurations (content)
+  become: yes
+  become_user: "{{ ws_username }}"
+  no_log: true
+  copy:
+    dest: "{{ item.destination }}"
+    content: "{{ item.contents }}"
+    owner: "{{ item.owner | default(ws_username) }}"
+    group: "{{ item.group | default(ws_username) }}"
+    mode: "{{ item.mode | default('0400') }}"
+  when: general_configs_content_enabled
+  loop:
+    "{{ general_configs_content }}"
+
+- name: add general configurations (files)
+  become: yes
+  become_user: "{{ ws_username }}"
+  copy:
+    dest: "{{ item.destination }}"
+    content: "{{ item.contents }}"
+    owner: "{{ item.owner | default(ws_username) }}"
+    group: "{{ item.group | default(ws_username) }}"
+    mode: "{{ item.mode | default('0400') }}"
+  when: general_configs_files_enabled
+  loop:
+    "{{ general_configs_files }}"

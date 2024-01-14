@@ -1,0 +1,4 @@
+---
+- hosts: razer-blade-stealth
+  roles:
+    - fedora
