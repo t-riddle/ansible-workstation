@@ -1,5 +1,5 @@
 # If storing sensitive variables, it's recommended to encrypt the file. See ansible-vault documentation for details
-# Example ansible-vault encrypt: ansible vault --vault-id yourId@prompt razer-blade-stealth.yml
+# Example ansible-vault encrypt: ansible-vault encrypt --vault-id yourId@prompt razer-blade-stealth.yml
 vault:
   username: 'vault_username'
   password: 'vault_password'
