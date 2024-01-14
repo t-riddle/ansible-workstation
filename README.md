@@ -36,7 +36,7 @@ The fonts are used for the `powerlevel10k` theme configured to improve the ZSH e
       ssh_contents: "{{ lookup('community.hashi_vault.hashi_vault', 'secret=kv/data/my-secret/path auth_method=userpass mount_point=userpass username={{ vault.username }} password={{ vault.password }} url={{ vault.uri }}')['my-github-ssh-key'] }}"
       host_list: github.com
   ```
-  * Encrypt the file above with `ansible vault --vault-id yourId@prompt workstation-name.yml` if storing sensitive information
+  * Encrypt the file above with `ansible-vault encrypt --vault-id yourId@prompt workstation-name.yml` if storing sensitive information
 * Example command for provisioning locally:
   * If using encrypted files: `ansible-playbook --ask-vault-pass inspiron-ubuntu.yml --become --ask-become-pass --connection=local`
   * Without encrypted files: `ansible-playbook inspiron-ubuntu.yml --become --ask-become-pass --connection=local`
